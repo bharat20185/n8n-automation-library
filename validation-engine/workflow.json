@@ -1,0 +1,67 @@
+{
+  "name": "Validation Utility Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "// ==============================\n// Validation Utilities\n// ==============================\nclass ValidationUtils {\n\n  static isValidEmail(email) {\n    const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\n    return emailRegex.test(email);\n  }\n\n  static isRequired(value) {\n    return value !== null && value !== undefined && value !== '';\n  }\n\n  static isValidLength(str, min = 0, max = 255) {\n    if (typeof str !== 'string') return false;\n    return str.length >= min && str.length <= max;\n  }\n\n  static validateFields(data, rules) {\n    const errors = [];\n\n    for (const [field, fieldRules] of Object.entries(rules)) {\n      const value = data[field];\n\n      for (const rule of fieldRules) {\n        switch (rule.type) {\n\n          case 'required':\n            if (!this.isRequired(value)) {\n              errors.push({\n                field,\n                message: rule.message || `${field} is required`,\n                type: 'required'\n              });\n            }\n            break;\n\n          case 'email':\n            if (value && !this.isValidEmail(value)) {\n              errors.push({\n                field,\n                message: rule.message || `${field} must be valid`,\n                type: 'email'\n              });\n            }\n            break;\n\n          case 'length':\n            if (value && !this.isValidLength(value, rule.min, rule.max)) {\n              errors.push({\n                field,\n                message: rule.message || `${field} must be ${rule.min}-${rule.max} chars`,\n                type: 'length'\n              });\n            }\n            break;\n\n        }\n      }\n    }\n\n    return {\n      isValid: errors.length === 0,\n      errors\n    };\n  }\n}\n\n\n// ==============================\n// Main Execution (Bulk Mode)\n// ==============================\n\n// Expecting:\n// {\n//   data: [ {...}, {...} ],\n//   rules: { ... }\n// }\n\nconst input = $input.first().json;\nconst { data, rules } = input;\n\n\n// ❌ Invalid input guard\nif (!Array.isArray(data) || !rules) {\n  return [{\n    json: {\n      success: false,\n      message: 'Invalid input: data must be array & rules required'\n    }\n  }];\n}\n\n\n// ==============================\n// Process each lead\n// ==============================\nreturn data.map((item, index) => {\n\n  // 🔹 Normalize data\n  const clean = {\n    name: item.name?.trim() || null,\n    email: item.email?.toLowerCase()?.trim() || null,\n    message: item.message?.trim() || null\n  };\n\n  // 🔹 Validate\n  const result = ValidationUtils.validateFields(clean, rules);\n\n  return {\n    json: {\n      index,                     // helps tracking\n      ...clean,                  // cleaned data\n      success: result.isValid,   // main flag\n      errors: result.errors,     // structured errors\n      error_count: result.errors.length,\n      timestamp: new Date().toISOString()\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -352,
+        -192
+      ],
+      "id": "614e3465-389f-4764-97b7-9a124384fb94",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "data",
+              "type": "array"
+            },
+            {
+              "name": "rules",
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -576,
+        -192
+      ],
+      "id": "87572495-819f-4da8-8f6a-b7d5d4e9064b",
+      "name": "When Executed by Another Workflow"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "da77a5f4-b353-45c0-997a-b44981581ba1",
+  "meta": {
+    "instanceId": "1123d0908f2d541239131dd712bef111b6e85e2a760694d94cdc5b97e37c5f89"
+  },
+  "id": "0VP6Lg9P8CShC3L4",
+  "tags": []
+}
