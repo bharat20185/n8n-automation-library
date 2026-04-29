@@ -1,0 +1,79 @@
+{
+  "name": "Send Mail",
+  "nodes": [
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "{{ $json.subject }}",
+        "message": "=Hi Team <br />,\n\n{{ $json.message }}\n\nRegards,\n{{ $json.name }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -208,
+        -64
+      ],
+      "id": "e3db85a3-2e53-4828-9960-379b417bc061",
+      "name": "Send a message",
+      "webhookId": "df57672b-7857-4df0-8661-acd0ef756e1f",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "send-mail",
+        "responseMode": "lastNode",
+        "options": {
+          "responseCode": {
+            "values": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -512,
+        -64
+      ],
+      "id": "e7a65f86-4a14-4a91-8b29-409c3b74ff27",
+      "name": "Webhook",
+      "webhookId": "40593210-f4a9-457a-9e24-01eae8874980"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "name": "John Doe",
+          "email": "john.doe@example.com",
+          "message": "Interested in your service"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "ebefd3e6-24f0-4f9b-9d1e-7a606a1a741c",
+  "meta": {},
+  "id": "uxHj3ee3Fr5OpHCO",
+  "tags": []
+}
